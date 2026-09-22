@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mail Admin Handover Email Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F6F4EF;
+    --card: #FFFFFF;
+    --ink: #1E2A2B;
+    --ink-soft: #55645F;
+    --line: #DDD7C8;
+    --teal: #1F5F53;
+    --teal-deep: #143F37;
+    --amber: #B8843A;
+    --focus: #1F5F53;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --paper: #14181A;
+      --card: #1D2225;
+      --ink: #ECEAE3;
+      --ink-soft: #A6ADA9;
+      --line: #333B3A;
+      --teal: #6FBBA6;
+      --teal-deep: #9FD8C6;
+      --amber: #D6A15C;
+      --focus: #6FBBA6;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #14181A;
+    --card: #1D2225;
+    --ink: #ECEAE3;
+    --ink-soft: #A6ADA9;
+    --line: #333B3A;
+    --teal: #6FBBA6;
+    --teal-deep: #9FD8C6;
+    --amber: #D6A15C;
+    --focus: #6FBBA6;
+  }
+
+  html, body { height: 100%; }
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+  }
+
+  header.page {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+
+  header.page p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    max-width: 56ch;
+    line-height: 1.5;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+    .wrap { padding: 32px 16px 48px; }
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 24px;
+  }
+
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  label .hint {
+    font-weight: 400;
+    color: var(--ink-soft);
+    margin-left: 6px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+
+  input[type="text"]::placeholder { color: var(--ink-soft); opacity: .6; }
+
+  input[type="text"]:focus {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 18%, transparent);
+  }
+
+  .field-status {
+    margin-top: 5px;
+    font-size: 12px;
+    color: var(--amber);
+    min-height: 15px;
+  }
+
+  .reset-link {
+    margin-top: 24px;
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 13px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+  }
+  .reset-link:hover { color: var(--ink); }
+
+  .preview-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .preview-head h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  button.action {
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, transform .05s ease;
+  }
+  button.action:hover { border-color: var(--teal); }
+  button.action:active { transform: translateY(1px); }
+
+  button.primary {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: #fff;
+  }
+  button.primary:hover { background: var(--teal-deep); border-color: var(--teal-deep); }
+
+  button.action:focus-visible, input:focus-visible, .reset-link:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* --- formatting toolbar --- */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tbtn {
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .tbtn:hover { border-color: var(--teal); }
+  .tbtn:active { transform: translateY(1px); }
+  .tbtn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  .toolbar-spacer { flex: 1; }
+
+  .edited-indicator {
+    font-size: 12.5px;
+    color: var(--amber);
+    white-space: nowrap;
+  }
+  .reset-inline {
+    font-family: inherit;
+    font-size: 12.5px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--teal);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+  .reset-inline:hover { color: var(--teal-deep); }
+
+  .toolbar-hint {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin: -6px 0 14px;
+  }
+
+  .email-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 22px 24px;
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+
+  .email-card:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .email-card .muted-fill {
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .email-card div { margin: 0 0 2px; }
+  .email-card a { color: var(--teal); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) translateY(12px);
+    background: var(--teal-deep);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 10;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast, button.action { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1>Mail admin handover email</h1>
+    <p>Fill in the three details below to generate the mail admin password-delivery email for a Xneelo-hosted mailbox account, formatted and ready to paste into an email.</p>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-label="Customer details">
+      <div class="field">
+        <label for="customerName">Customer name</label>
+        <input type="text" id="customerName" placeholder="e.g. Jane Botha" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="serverAddress">Server address <span class="hint">used for IMAP &amp; SMTP</span></label>
+        <input type="text" id="serverAddress" placeholder="e.g. mail.example.co.za" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="passwordLink">Password link <span class="hint">mail admin password</span></label>
+        <input type="text" id="passwordLink" placeholder="e.g. https://vault.bitwarden.com/#/send/…" autocomplete="off">
+        <div class="field-status" id="linkStatus"></div>
+      </div>
+      <button class="reset-link" id="resetBtn" type="button">Clear all fields</button>
+    </section>
+
+    <section class="panel" aria-label="Email preview">
+      <div class="preview-head">
+        <h2>Preview</h2>
+        <div class="actions">
+          <button class="action" id="copyPlainBtn" type="button">Copy as plain text</button>
+          <button class="action primary" id="copyFormattedBtn" type="button">Copy formatted</button>
+        </div>
+      </div>
+
+      <div class="toolbar" role="toolbar" aria-label="Text formatting">
+        <button type="button" class="tbtn" data-cmd="bold" title="Bold"><strong>B</strong></button>
+        <button type="button" class="tbtn" data-cmd="italic" title="Italic"><em>I</em></button>
+        <button type="button" class="tbtn" data-cmd="underline" title="Underline"><u>U</u></button>
+        <button type="button" class="tbtn" data-cmd="insertUnorderedList" title="Bullet list">&bull; List</button>
+        <button type="button" class="tbtn" data-cmd="removeFormat" title="Clear formatting">Clear</button>
+        <span class="toolbar-spacer"></span>
+        <span class="edited-indicator" id="editedIndicator" hidden>Edited &middot; <button type="button" class="reset-inline" id="resetEditsBtn">Reset to generated</button></span>
+      </div>
+      <p class="toolbar-hint">You can edit the message directly below before copying. Edits aren&rsquo;t saved &mdash; they&rsquo;re gone once you reload or close this page.</p>
+
+      <div class="email-card"
+           id="emailPreview"
+           contenteditable="true"
+           role="textbox"
+           aria-multiline="true"
+           aria-label="Editable email message"
+           spellcheck="false"></div>
+    </section>
+  </div>
+
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  const nameInput = document.getElementById('customerName');
+  const serverInput = document.getElementById('serverAddress');
+  const linkInput = document.getElementById('passwordLink');
+  const linkStatus = document.getElementById('linkStatus');
+  const preview = document.getElementById('emailPreview');
+  const toast = document.getElementById('toast');
+  const resetBtn = document.getElementById('resetBtn');
+  const editedIndicator = document.getElementById('editedIndicator');
+  const resetEditsBtn = document.getElementById('resetEditsBtn');
+
+  let edited = false;
+
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function escAttr(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function val(input, fallback) {
+    const v = input.value.trim();
+    return v.length ? v : fallback;
+  }
+
+  function isPlaceholder(input) {
+    return input.value.trim().length === 0;
+  }
+
+  function buildParts() {
+    const name = val(nameInput, 'Customer Name');
+    const server = val(serverInput, 'Server Address');
+    const link = linkInput.value.trim();
+    return { name, server, link,
+      nameEmpty: isPlaceholder(nameInput),
+      serverEmpty: isPlaceholder(serverInput),
+      linkEmpty: isPlaceholder(linkInput)
+    };
+  }
+
+  const NOTE = "Please note: Email hosting is provided as a free add-on to your Springnest website, by a third-party hosting provider, Xneelo. Desktop support is not included in Springnest's service offering.";
+  const ADMIN_LOGIN_URL = "https://login.konsoleh.co.za/cas/login";
+
+  function span(text, empty) {
+    return empty ? `<span class="muted-fill">${esc(text)}</span>` : esc(text);
+  }
+
+  function passwordLinkMarkup(p) {
+    if (p.linkEmpty) {
+      return `<span class="muted-fill">Password Link</span>`;
+    }
+    return `<a href="${escAttr(p.link)}" target="_blank" rel="noopener">Password Link</a>`;
+  }
+
+  // ---- Build the generated (template) version of the message ----
+
+  function buildEmailHTML(p) {
+    return [
+      `<div>Hi ${span(p.name, p.nameEmpty)},</div>`,
+      `<div><br></div>`,
+      `<div>Your mail admin password is available via the following Bitwarden link: ${passwordLinkMarkup(p)}</div>`,
+      `<div><br></div>`,
+      `<div>Login into mail admin at: <a href="${ADMIN_LOGIN_URL}" target="_blank" rel="noopener">${ADMIN_LOGIN_URL}</a></div>`,
+      `<div><br></div>`,
+      `<div><strong>Mailbox Server Settings:</strong></div>`,
+      `<div><br></div>`,
+      `<div><strong>IMAP Hostname/Incoming Mail Server:</strong></div>`,
+      `<div>- Server: ${span(p.server, p.serverEmpty)}</div>`,
+      `<div>- IMAP Port: 993 (with SSL)</div>`,
+      `<div><br></div>`,
+      `<div><strong>SMTP/Outgoing Mail Server:</strong></div>`,
+      `<div>- Server: ${span(p.server, p.serverEmpty)}</div>`,
+      `<div>- Port: 465 (with SSL)</div>`,
+      `<div><br></div>`,
+      `<div>Webmail Access: https://webmail.xneelo.com/</div>`,
+      `<div><br></div>`,
+      `<div>Kind regards,</div>`,
+      `<div><br></div>`,
+      `<div>Simon</div>`,
+      `<div><br></div>`,
+      `<div style="font-size:11px;color:#8a8a8a;">${esc(NOTE)}</div>`
+    ].join('');
+  }
+
+  function updateLinkStatus() {
+    const raw = linkInput.value.trim();
+    if (raw.length && !/^https?:\/\//i.test(raw)) {
+      linkStatus.textContent = 'This doesn\u2019t look like a link starting with http(s)://\u2014 double check it before sending.';
+    } else {
+      linkStatus.textContent = '';
+    }
+  }
+
+  function updateEditedIndicator() {
+    editedIndicator.hidden = !edited;
+  }
+
+  function regenerate() {
+    preview.innerHTML = buildEmailHTML(buildParts());
+    edited = false;
+    updateEditedIndicator();
+    updateLinkStatus();
+  }
+
+  // ---- Reading the (possibly hand-edited) live message back out ----
+
+  function cloneCleanPreview() {
+    const clone = preview.cloneNode(true);
+    clone.querySelectorAll('.muted-fill').forEach(el => {
+      el.replaceWith(document.createTextNode(el.textContent));
+    });
+    return clone;
+  }
+
+  function domToPlainText(node) {
+    let out = '';
+    node.childNodes.forEach(child => {
+      if (child.nodeType === Node.TEXT_NODE) {
+        out += child.textContent;
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        const tag = child.tagName.toLowerCase();
+        if (tag === 'br') {
+          out += '\n';
+        } else if (tag === 'a') {
+          const href = child.getAttribute('href') || '';
+          const text = child.textContent;
+          out += href ? `${text} (${href})` : text;
+        } else if (tag === 'li') {
+          out += '- ' + domToPlainText(child).trim() + '\n';
+        } else if (tag === 'div' || tag === 'p') {
+          out += domToPlainText(child) + '\n';
+        } else {
+          out += domToPlainText(child);
+        }
+      }
+    });
+    return out;
+  }
+
+  function plainTextFromLive() {
+    const clone = cloneCleanPreview();
+    let text = domToPlainText(clone);
+    text = text.replace(/\n{3,}/g, '\n\n').replace(/^\n+|\n+$/g, '');
+    return text;
+  }
+
+  function formattedHTMLFromLive() {
+    const clone = cloneCleanPreview();
+    return `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:#1a1a1a;">${clone.innerHTML}</div>`;
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  async function copyPlain() {
+    try {
+      await navigator.clipboard.writeText(plainTextFromLive());
+      showToast('Copied as plain text');
+    } catch (e) {
+      showToast('Couldn\u2019t copy \u2014 try selecting the preview manually');
+    }
+  }
+
+  async function copyFormatted() {
+    const html = formattedHTMLFromLive();
+    const plain = plainTextFromLive();
+    try {
+      if (window.ClipboardItem) {
+        const item = new ClipboardItem({
+          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/plain': new Blob([plain], { type: 'text/plain' })
+        });
+        await navigator.clipboard.write([item]);
+        showToast('Copied with formatting');
+      } else {
+        await navigator.clipboard.writeText(plain);
+        showToast('Copied as plain text (formatting not supported here)');
+      }
+    } catch (e) {
+      try {
+        await navigator.clipboard.writeText(plain);
+        showToast('Copied as plain text (formatting not supported here)');
+      } catch (e2) {
+        showToast('Couldn\u2019t copy \u2014 try selecting the preview manually');
+      }
+    }
+  }
+
+  document.getElementById('copyPlainBtn').addEventListener('click', copyPlain);
+  document.getElementById('copyFormattedBtn').addEventListener('click', copyFormatted);
+
+  resetBtn.addEventListener('click', () => {
+    nameInput.value = '';
+    serverInput.value = '';
+    linkInput.value = '';
+    regenerate();
+    nameInput.focus();
+  });
+
+  resetEditsBtn.addEventListener('click', () => {
+    regenerate();
+    showToast('Reverted to the generated message');
+  });
+
+  [nameInput, serverInput, linkInput].forEach(el => {
+    el.addEventListener('input', () => {
+      updateLinkStatus();
+      if (!edited) regenerate();
+    });
+  });
+
+  preview.addEventListener('input', () => {
+    if (!edited) {
+      edited = true;
+      updateEditedIndicator();
+    }
+  });
+
+  document.querySelectorAll('.tbtn[data-cmd]').forEach(btn => {
+    btn.addEventListener('mousedown', (e) => e.preventDefault());
+    btn.addEventListener('click', () => {
+      preview.focus();
+      document.execCommand(btn.dataset.cmd, false, null);
+      if (!edited) {
+        edited = true;
+        updateEditedIndicator();
+      }
+    });
+  });
+
+  regenerate();
+})();
+</script>
+</body>
+</html>
